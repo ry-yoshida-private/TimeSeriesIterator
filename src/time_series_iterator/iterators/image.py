@@ -6,7 +6,6 @@ from ..iterator import TimeSeriesIterator
 from ..parameters import TimeSeriesIterationParameters
 from ..media_type import MediaType
 
-
 class ImageIterator(TimeSeriesIterator):
     """
     Iterator for image data.
