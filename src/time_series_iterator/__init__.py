@@ -8,7 +8,11 @@ with support for configurable parameters and different indexing schemes.
 from .iterator import TimeSeriesIterator
 from .parameters import TimeSeriesIterationParameters
 from .index_base import IndexBase
-from .iterators import (ImageIterator, VideoIterator)
+from .media_type import MediaType
+from .iterators import (
+    ImageIterator,
+    VideoIterator,
+    )
 
 __all__ = [
     "TimeSeriesIterator",
