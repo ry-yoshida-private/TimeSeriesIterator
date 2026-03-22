@@ -57,7 +57,3 @@ with TimeSeriesIterator.build(MediaType.VIDEO, paths, params) as it:
         if time_id >= 5:
             break
 ```
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
