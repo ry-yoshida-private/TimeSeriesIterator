@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from id_manager import IDManager
 
 from .parameters import TimeSeriesIterationParameters
-from .media_type import MediaType
+from .utils import MediaType
 
 class TimeSeriesIterator(ABC):
     """
@@ -91,7 +91,7 @@ class TimeSeriesIterator(ABC):
         if data is None:
             raise StopIteration
 
-        self.time_id = self.time_id_manager.get_next_id()
+        self.time_id = self.time_id_manager.next_id
 
         if self.params.is_exceeded_end_time_id(self.time_id):
             raise StopIteration

@@ -1,11 +1,14 @@
 
+from __future__ import annotations
+
 import numpy as np
+from types import TracebackType
 
 from id_manager import IDManager
 from video_reader import VideoReader
 from ..iterator import TimeSeriesIterator
 from ..parameters import TimeSeriesIterationParameters
-from ..media_type import MediaType
+from ..utils import MediaType
 
 class VideoIterator(TimeSeriesIterator):
     """
@@ -47,9 +50,10 @@ class VideoIterator(TimeSeriesIterator):
             step=1
             )
         # manager for the frame index of the video files.
+        self.video_reader: VideoReader | None = None
         self.start_frame_index = self.params.start_index_on_python
         self._end_frame_ids: list[int] = self._get_end_frame_ids()
-        self._cumulative_end_frame_ids: list[int] = list(np.cumsum(self._end_frame_ids))
+        self._cumulative_end_frame_ids: list[int] = [int(value) for value in np.cumsum(self._end_frame_ids)]
 
     def _get_end_frame_ids(self) -> list[int]:
         """
@@ -59,13 +63,13 @@ class VideoIterator(TimeSeriesIterator):
         ----------
         list[int]: The end frame ids of the video files.
         """
-        end_frame_ids = []
+        end_frame_ids: list[int] = []
         for path in self.paths:
             video_reader = VideoReader(
                 video_path=path, 
                 iter_start_frame=0
                 )
-            total_frame = video_reader.total_frame
+            total_frame = int(video_reader.total_frame)
             end_frame_ids.append(total_frame)
             video_reader.release()
         return end_frame_ids
@@ -83,12 +87,12 @@ class VideoIterator(TimeSeriesIterator):
         StopIteration: If the end of the video is reached.
         """
         while True:
-            if not hasattr(self, 'video_reader') or self.video_reader.is_reach_end_of_video:
-                file_index = self.file_id_manager.get_next_id()
+            if self.video_reader is None or self.video_reader.is_reach_end_of_video:
+                file_index = self.file_id_manager.next_id
                 if file_index >= len(self.paths):
                     return None
 
-                if hasattr(self, 'video_reader'):
+                if self.video_reader is not None:
                     self.video_reader.release()
 
                 self.video_reader = VideoReader(
@@ -104,24 +108,32 @@ class VideoIterator(TimeSeriesIterator):
             if frame is not None:
                 return frame
 
-    def _update_start_index(self):
+    def _update_start_index(self) -> None:
         """
         Update the start index of the video reader to ensure that the reading the frame of next video file is correct.
         """
+        if self.video_reader is None:
+            return
         remaining = (self.video_reader.total_frame - self.start_frame_index) % self.params.sampling_freq
         self.start_frame_index = (self.params.sampling_freq - remaining) % self.params.sampling_freq
 
-    def close(self):
-        if hasattr(self, 'video_reader'):
+    def close(self) -> None:
+        if self.video_reader is not None:
             self.video_reader.release()
+            self.video_reader = None
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.close()
         
-    def __enter__(self):
+    def __enter__(self) -> VideoIterator:
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
         self.close()
 
     def __len__(self) -> int:
@@ -181,51 +193,3 @@ class VideoIterator(TimeSeriesIterator):
     @property
     def fps(self) -> float:
         return self.params.raw_sampling_rate
-
-
-#################
-# Example usage #
-#################
-
-if __name__ == "__main__":
-    import os
-    import cv2
-    import glob
-    from ..media_type import MediaType
-    from ..parameters import TimeSeriesIterationParameters
-    from ..index_base import IndexBase
-    
-    paths = sorted(glob.glob("data/debug/test/c1/video/*.mp4"))
-    params = TimeSeriesIterationParameters(
-        pre_sampled_freq=1,
-        sampling_freq=1,
-        raw_sampling_rate=30,
-        index_base=IndexBase.ZERO,
-        start_time_id=0,
-        end_time_id=-1,
-        )
-    iterator = TimeSeriesIterator.build(
-        media_type=MediaType.VIDEO,
-        paths=paths,
-        parameters=params
-        )
-
-    from tqdm import tqdm
-    tqdm_iterator = iter(tqdm(iterator))
-
-    frame_id, frame = next(iterator)
-    frame_id, frame = next(tqdm_iterator)
-
-    # for frame_id, frame in iterator:
-    #     print(f"frame_id: {frame_id}, frame.shape: {frame.shape}")
-    #     if frame_id > 10:
-    #         break
-    for frame_id, frame in tqdm_iterator:
-        # print(f"frame_id: {frame_id}, frame.shape: {frame.shape}")
-        if frame_id > 10:
-            break
-
-    print(len(iterator))
-    frame = iterator.get_image(30) # type: ignore
-
-    cv2.imwrite("tmp.jpg", frame)

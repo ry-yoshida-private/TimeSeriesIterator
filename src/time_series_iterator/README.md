@@ -2,16 +2,16 @@
 
 ## Overview
 
-A program for iterating through time series data such as images and videos in ascending order.
+Package for iterating time-series media data in ascending order with configurable sampling and indexing.
 
 ## Components
 
 | Component | Description |
 |-----------|-------------|
-| [iterator.py](./base.py) | Base class for iteration |
-| [parameters.py](./parameters.py) | Program that consolidates parameters used for Iterator |
-| [index_base.py](./index_base.py) | Enum defining base index for time series data (ZERO or ONE) |
-| [iterators](./iterators/README.md) | Directory containing iterator implementations for different data types |
+| [iterator.py](./iterator.py) | Base iterator class and factory method (`TimeSeriesIterator.build`) |
+| [parameters.py](./parameters.py) | Dataclass for iteration parameters (sampling rate, start/end IDs, index base) |
+| [utils/](./utils/README.md) | Utility enums such as media type and index base |
+| [iterators/](./iterators/README.md) | Concrete iterator implementations for image/video inputs |
 
 ## Parameters
 

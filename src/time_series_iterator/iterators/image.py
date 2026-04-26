@@ -1,10 +1,11 @@
 import cv2
 import numpy as np
+from types import TracebackType
 
 from id_manager import IDManager
 from ..iterator import TimeSeriesIterator
 from ..parameters import TimeSeriesIterationParameters
-from ..media_type import MediaType
+from ..utils import MediaType
 
 class ImageIterator(TimeSeriesIterator):
     """
@@ -40,7 +41,7 @@ class ImageIterator(TimeSeriesIterator):
         ----------
         np.ndarray | None: The next data from the image iterator.
         """
-        index = self.file_id_manager.get_next_id()
+        index = self.file_id_manager.next_id
         if index >= len(self.paths):
             return None
         return cv2.imread(self.paths[index])
@@ -54,7 +55,12 @@ class ImageIterator(TimeSeriesIterator):
     def __enter__(self):
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
         self.close()
 
     def __len__(self) -> int:
@@ -101,29 +107,3 @@ class ImageIterator(TimeSeriesIterator):
     @property
     def end_time_id(self) -> int:
         return (len(self.paths)-1)*self.params.pre_sampled_freq*self.params.sampling_freq + self.params.index_base.value
-
-################################################################################
-
-if __name__ == "__main__":
-    import tqdm    
-    import os, glob
-    from .image import ImageIterator
-    from ..parameters import TimeSeriesIterationParameters
-
-    params = TimeSeriesIterationParameters(
-        pre_sampled_freq=1,
-        sampling_freq=2,
-        start_time_id=1,
-        end_time_id=100
-        )
-
-    image_paths = sorted(glob.glob("data/Wildtrack/Image_subsets/C1/*.png"))
-
-    image_iterator = ImageIterator(
-        paths=image_paths,
-        params=params
-        )
-
-    for frame_id, image in tqdm.tqdm(image_iterator):
-        # print(frame_id, image.shape)
-        pass

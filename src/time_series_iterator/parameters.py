@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from .index_base import IndexBase
+from .utils import IndexBase
 
 @dataclass
 class TimeSeriesIterationParameters:
