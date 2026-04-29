@@ -41,8 +41,8 @@ class TimeSeriesIterator(ABC):
         self.paths = paths
 
         self.time_id_manager = IDManager(
-            start=self.params.start_time_id, 
-            step=self.params.sampling_freq*self.params.pre_sampled_freq
+            current_id=self.params.start_time_id,
+            step=self.params.sampling_freq * self.params.pre_sampled_freq,
             )
 
     def _validate_paths(

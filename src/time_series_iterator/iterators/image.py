@@ -29,8 +29,8 @@ class ImageIterator(TimeSeriesIterator):
             )
 
         self.file_id_manager = IDManager(
-            start=self.params.start_index_on_python, 
-            step=self.params.sampling_freq
+            current_id=self.params.offset_start_id,
+            step=self.params.sampling_freq,
             )
 
     def _next_data(self) -> np.ndarray | None:

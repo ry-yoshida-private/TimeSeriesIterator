@@ -46,12 +46,12 @@ class VideoIterator(TimeSeriesIterator):
             )
         # manager for the file index of the video files.
         self.file_id_manager = IDManager(
-            start=self.params.start_video_file_index, 
-            step=1
+            current_id=self.params.start_video_file_index,
+            step=1,
             )
         # manager for the frame index of the video files.
         self.video_reader: VideoReader | None = None
-        self.start_frame_index = self.params.start_index_on_python
+        self.start_frame_index = self.params.offset_start_id
         self._end_frame_ids: list[int] = self._get_end_frame_ids()
         self._cumulative_end_frame_ids: list[int] = [int(value) for value in np.cumsum(self._end_frame_ids)]
 

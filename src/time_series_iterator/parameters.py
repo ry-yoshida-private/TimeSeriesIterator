@@ -51,13 +51,13 @@ class TimeSeriesIterationParameters:
                 )
 
     @property
-    def start_index_on_python(self) -> int:
+    def offset_start_id(self) -> int:
         """
-        The start index to access the time series data on python.
-        
+        Start offset for sequence access: ``start_time_id`` minus ``index_base``.
+
         Returns:
         --------
-        int: The start index of the actual time series data on python.
+        int: Zero-based index into the underlying time series sequence.
         """
         return self.start_time_id - self.index_base.value
 
