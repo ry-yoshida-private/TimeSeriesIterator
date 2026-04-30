@@ -19,4 +19,5 @@ __all__ = [
     "IndexBase",
     "ImageIterator",
     "VideoIterator",
+    "MediaType"
     ]
